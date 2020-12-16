@@ -4,6 +4,7 @@ Ran Plan for 2 projects:
 1. dir: `dir2` workspace: `default`
 
 ### 1. dir: `dir1` workspace: `default`
+Change Summary: `Plan: 1 to add, 0 to change, 0 to destroy.`
 <details><summary>Show Output</summary>
 
 ```diff
@@ -32,6 +33,7 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 
 ---
 ### 2. dir: `dir2` workspace: `default`
+Change Summary: `Plan: 1 to add, 0 to change, 0 to destroy.`
 <details><summary>Show Output</summary>
 
 ```diff
