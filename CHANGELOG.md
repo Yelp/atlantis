@@ -1,3 +1,11 @@
+# v0.15.0-yelp3
+
+## Description
+Include changes from Daniel Popescu to introduce the plan summary at the top of the comment
+
+## Features
+* Show plan output ([#1239](https://github.com/runatlantis/atlantis/pull/1239))
+
 # v0.15.0
 
 ## Description
