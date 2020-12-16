@@ -4,6 +4,7 @@ Ran Plan for 2 projects:
 1. dir: `.` workspace: `staging`
 
 ### 1. dir: `.` workspace: `default`
+Change Summary: `Plan: 1 to add, 0 to change, 0 to destroy.`
 <details><summary>Show Output</summary>
 
 ```diff
@@ -36,6 +37,7 @@ postplan custom
 
 ---
 ### 2. dir: `.` workspace: `staging`
+Change Summary: `Plan: 1 to add, 0 to change, 0 to destroy.`
 <details><summary>Show Output</summary>
 
 ```diff
