@@ -1,5 +1,6 @@
 Ran Plan for dir: `.` workspace: `default`
 
+Change Summary: `Plan: 3 to add, 0 to change, 0 to destroy.`
 <details><summary>Show Output</summary>
 
 ```diff

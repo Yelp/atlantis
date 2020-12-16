@@ -173,11 +173,13 @@ func (p *DefaultProjectCommandRunner) doPlan(ctx models.ProjectCommandContext) (
 	}
 
 	var summary string
-	for _, line := range outputs {
-		matched, _ := regexp.MatchString("(^Plan:|^No changes\\.).*", line)
-		if matched {
-			summary = line
-			break
+	for _, output := range outputs {
+		for _, line := range strings.Split(strings.TrimSuffix(output, "\n"), "\n") {
+			matched, _ := regexp.MatchString("(^Plan:|^No changes\\.).*", line)
+			if matched {
+				summary = line
+				break
+			}
 		}
 	}
 
