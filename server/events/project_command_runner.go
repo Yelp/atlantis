@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -171,9 +172,21 @@ func (p *DefaultProjectCommandRunner) doPlan(ctx models.ProjectCommandContext) (
 		return nil, "", fmt.Errorf("%s\n%s", err, strings.Join(outputs, "\n"))
 	}
 
+	var summary string
+	for _, output := range outputs {
+		for _, line := range strings.Split(strings.TrimSuffix(output, "\n"), "\n") {
+			matched, _ := regexp.MatchString("(^Plan:|^No changes\\.).*", line)
+			if matched {
+				summary = line
+				break
+			}
+		}
+	}
+
 	return &models.PlanSuccess{
 		LockURL:         p.LockURLGenerator.GenerateLockURL(lockAttempt.LockKey),
 		TerraformOutput: strings.Join(outputs, "\n"),
+		ChangeSummary:   summary,
 		RePlanCmd:       ctx.RePlanCmd,
 		ApplyCmd:        ctx.ApplyCmd,
 		HasDiverged:     hasDiverged,
