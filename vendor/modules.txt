@@ -65,6 +65,8 @@ github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/sts
+# github.com/aymerick/douceur v0.2.0
+github.com/aymerick/douceur/css
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 github.com/bgentry/go-netrc/netrc
 # github.com/bradleyfalzon/ghinstallation v1.1.1
@@ -73,6 +75,8 @@ github.com/bradleyfalzon/ghinstallation
 # github.com/briandowns/spinner v0.0.0-20170614154858-48dbb65d7bd5
 ## explicit
 github.com/briandowns/spinner
+# github.com/chris-ramon/douceur v0.2.0
+github.com/chris-ramon/douceur/parser
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
@@ -102,7 +106,7 @@ github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.16.0
 ## explicit
 github.com/go-playground/universal-translator
-# github.com/go-test/deep v1.0.3
+# github.com/go-test/deep v1.0.4
 ## explicit
 github.com/go-test/deep
 # github.com/golang/protobuf v1.3.2
@@ -135,6 +139,8 @@ github.com/google/go-querystring/query
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
+# github.com/gorilla/css v1.0.0
+github.com/gorilla/css/scanner
 # github.com/gorilla/mux v1.8.0
 ## explicit
 github.com/gorilla/mux
@@ -202,6 +208,10 @@ github.com/konsorten/go-windows-terminal-sequences
 # github.com/leodido/go-urn v1.2.0
 ## explicit
 github.com/leodido/go-urn
+# github.com/lusis/go-slackbot v0.0.0-20210303200821-3c34a039d473
+## explicit
+# github.com/lusis/slack-test v0.0.0-20190426140909-c40012f20018
+## explicit
 # github.com/magiconair/properties v1.8.1
 github.com/magiconair/properties
 # github.com/mattn/go-colorable v0.0.9
@@ -211,7 +221,7 @@ github.com/mattn/go-isatty
 # github.com/mcdafydd/go-azuredevops v0.12.0
 ## explicit
 github.com/mcdafydd/go-azuredevops/azuredevops
-# github.com/microcosm-cc/bluemonday v1.0.1
+# github.com/microcosm-cc/bluemonday v1.0.5
 ## explicit
 github.com/microcosm-cc/bluemonday
 # github.com/mitchellh/colorstring v0.0.0-20150917214807-8631ce90f286
