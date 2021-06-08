@@ -476,7 +476,8 @@ func TestRunAutoplanCommand_DeletePlans(t *testing.T) {
 		ThenReturn(tmp, nil)
 	fixtures.Pull.BaseRepo = fixtures.GithubRepo
 	ch.RunAutoplanCommand(fixtures.GithubRepo, fixtures.GithubRepo, fixtures.Pull, fixtures.User)
-	pendingPlanFinder.VerifyWasCalledOnce().DeletePlans(tmp)
+	// gets called twice: the first time before the plan starts, the second time after the plan errors
+	pendingPlanFinder.VerifyWasCalled(Times(2)).DeletePlans(tmp)
 }
 
 func TestFailedApprovalCreatesFailedStatusUpdate(t *testing.T) {
