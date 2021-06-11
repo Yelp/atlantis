@@ -61,6 +61,92 @@ func (m *LocalConftestCache) Get(key *version.Version) (string, error) {
 	return exec.LookPath(fmt.Sprintf("conftest%s", ConftestVersion))
 }
 
+func TestGitHubWorkflowWithUpdates(t *testing.T) {
+
+	if testing.Short() {
+		t.SkipNow()
+	}
+	// Ensure we have >= TF 0.12 locally.
+	ensureRunning012(t)
+	t.Run("multiple workspaces updates", func(t *testing.T) {
+		RegisterMockTestingT(t)
+
+		// reset userConfig
+		userConfig = server.UserConfig{}
+		userConfig.DisableApply = false
+
+		ctrl, vcsClient, githubGetter, atlantisWorkspace := setupE2E(t, "workspace-parallel-yaml")
+
+		// Set the repo to be cloned through the testing backdoor.
+		repoDir, headSHA, cleanup := initializeRepo(t, "workspace-parallel-yaml")
+		defer cleanup()
+		atlantisWorkspace.TestingOverrideHeadCloneURL = fmt.Sprintf("file://%s", repoDir)
+
+		// Setup test dependencies.
+		w := httptest.NewRecorder()
+		When(githubGetter.GetPullRequest(AnyRepo(), AnyInt())).ThenReturn(GitHubPullRequestParsed(headSHA), nil)
+		When(vcsClient.GetModifiedFiles(AnyRepo(), matchers.AnyModelsPullRequest())).ThenReturn([]string{"staging/main.tf", "production/main.tf"}, nil)
+
+		// First, send the open pull request event which triggers autoplan.
+		pullOpenedReq := GitHubPullRequestOpenedEvent(t, headSHA)
+		ctrl.Post(w, pullOpenedReq)
+		responseContains(t, w, 200, "Processing...")
+
+		t.Log("UPDATE\n\n")
+		runCmd(t, repoDir, "git", "rm", "production/main.tf")
+		runCmd(t, repoDir, "git", "commit", "-am", "branch update")
+		headSHA = runCmd(t, repoDir, "git", "rev-parse", "HEAD")
+		headSHA = strings.Trim(headSHA, "\n")
+
+		When(githubGetter.GetPullRequest(AnyRepo(), AnyInt())).ThenReturn(GitHubPullRequestUpdatedParsed(headSHA), nil)
+		When(vcsClient.GetModifiedFiles(AnyRepo(), matchers.AnyModelsPullRequest())).ThenReturn([]string{"staging/main.tf"}, nil)
+
+		pullUpdatedReq := GitHubPullRequestUpdatedEvent(t, headSHA)
+		w = httptest.NewRecorder()
+		ctrl.Post(w, pullUpdatedReq)
+		responseContains(t, w, 200, "Processing...")
+
+		t.Log("APPLY\n\n")
+		commentReq := GitHubCommentEvent(t, "atlantis apply")
+		w = httptest.NewRecorder()
+		ctrl.Post(w, commentReq)
+		responseContains(t, w, 200, "Processing...")
+
+		t.Log("CLOSING\n\n")
+		// Send the "pull closed" event which would be triggered by the
+		// automerge or a manual merge.
+		pullClosedReq := GitHubPullRequestClosedEvent(t)
+		w = httptest.NewRecorder()
+		ctrl.Post(w, pullClosedReq)
+		responseContains(t, w, 200, "Pull request cleaned successfully")
+
+		ExpReplies := [][]string{
+			{"exp-output-autoplan-production.txt"},
+			{"exp-output-autoplan-staging.txt"},
+			{"exp-output-apply-all-staging.txt"},
+			{"exp-output-merge.txt"},
+		}
+
+		expNumReplies := len(ExpReplies)
+		_, _, actReplies, _ := vcsClient.VerifyWasCalled(Times(expNumReplies)).CreateComment(AnyRepo(), AnyInt(), AnyString(), AnyString()).GetAllCapturedArguments()
+		t.Logf("len replies: %d", len(actReplies))
+		for _, rep := range actReplies {
+			t.Logf("rep: %v\n", rep)
+			t.Log("----------------------------------")
+		}
+		Assert(t, len(ExpReplies) == len(actReplies), "missing expected replies, got %d but expected %d", len(actReplies), len(ExpReplies))
+		asd := runCmd(t, repoDir, "pwd")
+		t.Logf("asd: %v\n", asd)
+		asd = runCmd(t, repoDir, "ls", "-al")
+		t.Logf("asd: %v\n", asd)
+		for i, expReply := range ExpReplies {
+			assertCommentEquals(t, expReply, actReplies[i], repoDir, false)
+		}
+
+	})
+
+}
+
 func TestGitHubWorkflow(t *testing.T) {
 
 	if testing.Short() {
@@ -924,6 +1010,18 @@ func GitHubPullRequestOpenedEvent(t *testing.T, headSHA string) *http.Request {
 	return req
 }
 
+func GitHubPullRequestUpdatedEvent(t *testing.T, headSHA string) *http.Request {
+	requestJSON, err := ioutil.ReadFile(filepath.Join("testfixtures", "githubPullRequestUpdatedEvent.json"))
+	Ok(t, err)
+	// Replace sha with expected sha.
+	requestJSONStr := strings.Replace(string(requestJSON), "c31fd9ea6f557ad2ea659944c3844a059b83bc5d", headSHA, -1)
+	req, err := http.NewRequest("POST", "/events", bytes.NewBuffer([]byte(requestJSONStr)))
+	Ok(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(githubHeader, "pull_request")
+	return req
+}
+
 func GitHubPullRequestClosedEvent(t *testing.T) *http.Request {
 	requestJSON, err := ioutil.ReadFile(filepath.Join("testfixtures", "githubPullRequestClosedEvent.json"))
 	Ok(t, err)
@@ -935,6 +1033,36 @@ func GitHubPullRequestClosedEvent(t *testing.T) *http.Request {
 }
 
 func GitHubPullRequestParsed(headSHA string) *github.PullRequest {
+	// headSHA can't be empty so default if not set.
+	if headSHA == "" {
+		headSHA = "13940d121be73f656e2132c6d7b4c8e87878ac8d"
+	}
+	return &github.PullRequest{
+		Number:  github.Int(2),
+		State:   github.String("open"),
+		HTMLURL: github.String("htmlurl"),
+		Head: &github.PullRequestBranch{
+			Repo: &github.Repository{
+				FullName: github.String("runatlantis/atlantis-tests"),
+				CloneURL: github.String("https://github.com/runatlantis/atlantis-tests.git"),
+			},
+			SHA: github.String(headSHA),
+			Ref: github.String("branch"),
+		},
+		Base: &github.PullRequestBranch{
+			Repo: &github.Repository{
+				FullName: github.String("runatlantis/atlantis-tests"),
+				CloneURL: github.String("https://github.com/runatlantis/atlantis-tests.git"),
+			},
+			Ref: github.String("master"),
+		},
+		User: &github.User{
+			Login: github.String("atlantisbot"),
+		},
+	}
+}
+
+func GitHubPullRequestUpdatedParsed(headSHA string) *github.PullRequest {
 	// headSHA can't be empty so default if not set.
 	if headSHA == "" {
 		headSHA = "13940d121be73f656e2132c6d7b4c8e87878ac8d"
