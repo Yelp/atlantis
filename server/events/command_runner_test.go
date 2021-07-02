@@ -128,6 +128,7 @@ func setup(t *testing.T) *vcsmocks.MockClient {
 		parallelPoolSize,
 		SilenceNoProjects,
 		defaultBoltDB,
+		deleteLockCommand,
 	)
 
 	applyCommandRunner = events.NewApplyCommandRunner(

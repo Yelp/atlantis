@@ -21,6 +21,7 @@ func NewPlanCommandRunner(
 	parallelPoolSize int,
 	SilenceNoProjects bool,
 	pullStatusFetcher PullStatusFetcher,
+	deleteLockCommand DeleteLockCommand,
 ) *PlanCommandRunner {
 	return &PlanCommandRunner{
 		silenceVCSStatusNoPlans:    silenceVCSStatusNoPlans,
@@ -38,6 +39,7 @@ func NewPlanCommandRunner(
 		parallelPoolSize:           parallelPoolSize,
 		SilenceNoProjects:          SilenceNoProjects,
 		pullStatusFetcher:          pullStatusFetcher,
+		deleteLockCommand:          deleteLockCommand,
 	}
 }
 
@@ -63,6 +65,7 @@ type PlanCommandRunner struct {
 	autoMerger                 *AutoMerger
 	parallelPoolSize           int
 	pullStatusFetcher          PullStatusFetcher
+	deleteLockCommand          DeleteLockCommand
 }
 
 func (p *PlanCommandRunner) runAutoplan(ctx *CommandContext) {
@@ -106,8 +109,8 @@ func (p *PlanCommandRunner) runAutoplan(ctx *CommandContext) {
 	}
 
 	// discard previous plans that might not be relevant anymore
-	ctx.Log.Debug("deleting previous plans")
-	p.deletePlans(ctx)
+	ctx.Log.Debug("deleting locks and plans")
+	p.deleteLockCommand.DeleteLocksByPull(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num)
 
 	// Only run commands in parallel if enabled
 	var result CommandResult
@@ -186,8 +189,8 @@ func (p *PlanCommandRunner) run(ctx *CommandContext, cmd *CommentCommand) {
 	// if the plan is generic, new plans will be generated based on changes
 	// discard previous plans that might not be relevant anymore
 	if !cmd.IsForSpecificProject() {
-		ctx.Log.Debug("deleting previous plans")
-		p.deletePlans(ctx)
+		ctx.Log.Debug("deleting locks and plans")
+		p.deleteLockCommand.DeleteLocksByPull(ctx.Pull.BaseRepo.FullName, ctx.Pull.Num)
 	}
 
 	// Only run commands in parallel if enabled
