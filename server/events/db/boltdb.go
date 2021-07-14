@@ -30,13 +30,13 @@ const (
 	pullKeySeparator      = "::"
 )
 
-// New returns a valid locker. We need to be able to write to dataDir
+// New returns a valid locker. We need to be able to write to DBDir
 // since bolt stores its data as a file
-func New(dataDir string) (*BoltDB, error) {
-	if err := os.MkdirAll(dataDir, 0700); err != nil {
-		return nil, errors.Wrap(err, "creating data dir")
+func New(DBDir string) (*BoltDB, error) {
+	if err := os.MkdirAll(DBDir, 0700); err != nil {
+		return nil, errors.Wrap(err, "creating db dir")
 	}
-	db, err := bolt.Open(path.Join(dataDir, "atlantis.db"), 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(path.Join(DBDir, "atlantis.db"), 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		if err.Error() == "timeout" {
 			return nil, errors.New("starting BoltDB: timeout (a possible cause is another Atlantis instance already running)")

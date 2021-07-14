@@ -295,7 +295,7 @@ func NewServer(userConfig UserConfig, config Config) (*Server, error) {
 		DisableRepoLocking:       userConfig.DisableRepoLocking,
 	}
 
-	boltdb, err := db.New(userConfig.DataDir)
+	boltdb, err := db.New(userConfig.DBDir)
 	if err != nil {
 		return nil, err
 	}

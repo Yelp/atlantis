@@ -53,6 +53,7 @@ const (
 	ConfigFlag                 = "config"
 	CheckoutStrategyFlag       = "checkout-strategy"
 	DataDirFlag                = "data-dir"
+	DBDirFlag                  = "db-dir"
 	DefaultTFVersionFlag       = "default-tf-version"
 	DisableApplyAllFlag        = "disable-apply-all"
 	DisableApplyFlag           = "disable-apply"
@@ -179,6 +180,10 @@ var stringFlags = map[string]stringFlag{
 	},
 	DataDirFlag: {
 		description:  "Path to directory to store Atlantis data.",
+		defaultValue: DefaultDataDir,
+	},
+	DBDirFlag: {
+		description:  "Path to directory to store Atlantis lock database.",
 		defaultValue: DefaultDataDir,
 	},
 	GHHostnameFlag: {
@@ -587,6 +592,9 @@ func (s *ServerCmd) setDefaults(c *server.UserConfig) {
 	}
 	if c.DataDir == "" {
 		c.DataDir = DefaultDataDir
+	}
+	if c.DBDir == "" {
+		c.DBDir = DefaultDataDir
 	}
 	if c.GithubHostname == "" {
 		c.GithubHostname = DefaultGHHostname
