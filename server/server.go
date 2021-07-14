@@ -617,6 +617,7 @@ func NewServer(userConfig UserConfig, config Config) (*Server, error) {
 		userConfig.ParallelPoolSize,
 		userConfig.SilenceNoProjects,
 		boltdb,
+		lockingClient,
 	)
 
 	pullReqStatusFetcher := vcs.NewPullReqStatusFetcher(vcsClient)
