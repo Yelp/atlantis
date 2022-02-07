@@ -22,7 +22,6 @@ require (
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-test/deep v1.0.7
-	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/google/go-github/v31 v31.0.0
 	github.com/google/uuid v1.1.2-0.20200519141726-cb32006e483f // indirect
 	github.com/gorilla/mux v1.8.0
@@ -53,7 +52,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli v1.22.5
 	github.com/urfave/negroni v0.3.0
-	github.com/xanzy/go-gitlab v0.48.0
+	github.com/xanzy/go-gitlab v0.54.4
 	github.com/zclconf/go-cty v1.5.1 // indirect
 	go.etcd.io/bbolt v1.3.5
 	go.opencensus.io v0.22.3 // indirect
