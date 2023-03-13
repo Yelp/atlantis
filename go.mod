@@ -35,7 +35,7 @@ require (
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lusis/slack-test v0.0.0-20190426140909-c40012f20018 // indirect
 	github.com/mcdafydd/go-azuredevops v0.12.0
-	github.com/microcosm-cc/bluemonday v1.0.7
+	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/mitchellh/colorstring v0.0.0-20150917214807-8631ce90f286
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mohae/deepcopy v0.0.0-20170603005431-491d3605edfb
@@ -58,9 +58,9 @@ require (
 	go.etcd.io/bbolt v1.3.5
 	go.opencensus.io v0.22.3 // indirect
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c // indirect
-	golang.org/x/tools v0.0.0-20201023174141-c8cfbd0f21e6 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200701001935-0939c5918c31 // indirect
 	google.golang.org/grpc v1.30.0 // indirect
