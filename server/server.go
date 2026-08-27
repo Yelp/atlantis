@@ -544,11 +544,26 @@ func NewServer(userConfig UserConfig, config Config) (*Server, error) {
 	applyLockingClient = locking.NewApplyClient(database, disableApply, disableGlobalApplyLock)
 	workingDirLocker := events.NewDefaultWorkingDirLocker()
 
+	var gitCacheManager *events.GitCacheManager
+	if userConfig.GitCacheDir != "" {
+		if err := os.MkdirAll(userConfig.GitCacheDir, 0700); err != nil {
+			return nil, fmt.Errorf("creating git cache dir %q: %w", userConfig.GitCacheDir, err)
+		}
+		refreshInterval := time.Duration(userConfig.GitCacheRefreshInterval) * time.Second
+		gitCacheManager = &events.GitCacheManager{
+			CacheDir: userConfig.GitCacheDir,
+			Interval: refreshInterval,
+			Logger:   logger,
+		}
+		go gitCacheManager.Start(context.Background())
+	}
+
 	var workingDir events.WorkingDir = &events.FileWorkspace{
 		DataDir:          userConfig.DataDir,
 		CheckoutMerge:    userConfig.CheckoutStrategy == "merge",
 		CheckoutDepth:    userConfig.CheckoutDepth,
 		GithubAppEnabled: githubAppEnabled,
+		GitCacheManager:  gitCacheManager,
 	}
 
 	scheduledExecutorService := scheduled.NewExecutorService(

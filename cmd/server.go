@@ -156,6 +156,8 @@ const (
 	TFEHostnameFlag                  = "tfe-hostname"
 	TFELocalExecutionModeFlag        = "tfe-local-execution-mode"
 	TFETokenFlag                     = "tfe-token"
+	GitCacheDirFlag                  = "git-cache-dir"
+	GitCacheRefreshIntervalFlag      = "git-cache-refresh-interval"
 	WriteGitCredsFlag                = "write-git-creds" // nolint: gosec
 	WebhookHttpHeaders               = "webhook-http-headers"
 	WebBasicAuthFlag                 = "web-basic-auth"
@@ -175,6 +177,7 @@ const (
 	DefaultBlockedExtraArgs             = "-chdir,--chdir,-plugin-dir,--plugin-dir"
 	DefaultCheckoutStrategy             = CheckoutStrategyBranch
 	DefaultCheckoutDepth                = 0
+	DefaultGitCacheRefreshInterval      = 60
 	DefaultBitbucketBaseURL             = bitbucketcloud.BaseURL
 	DefaultDataDir                      = "~/.atlantis"
 	DefaultEmojiReaction                = ""
@@ -323,6 +326,12 @@ var stringFlags = map[string]stringFlag{
 	ExecutableName: {
 		description:  "Comment command executable name.",
 		defaultValue: DefaultExecutableName,
+	},
+	GitCacheDirFlag: {
+		description: "Path to directory for storing git mirror clones used as reference repos." +
+			" When set, Atlantis uses git clone --reference-if-able to speed up workspace cloning." +
+			" If empty (default), git caching is disabled.",
+		defaultValue: "",
 	},
 	GHHostnameFlag: {
 		description:  "Hostname of your Github Enterprise installation. If using github.com, no need to set.",
@@ -697,6 +706,10 @@ var boolFlags = map[string]boolFlag{
 	},
 }
 var intFlags = map[string]intFlag{
+	GitCacheRefreshIntervalFlag: {
+		description:  "How often (in seconds) the git cache manager refreshes mirrors. Only used when --git-cache-dir is set.",
+		defaultValue: DefaultGitCacheRefreshInterval,
+	},
 	CheckoutDepthFlag: {
 		description: fmt.Sprintf("Used only if --%s=%s.", CheckoutStrategyFlag, CheckoutStrategyMerge) +
 			" How many commits to include in each of base and feature branches when cloning repository." +

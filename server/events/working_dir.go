@@ -111,6 +111,9 @@ type FileWorkspace struct {
 	GpgNoSigningEnabled bool
 	// flag indicating if we have to merge with potential new changes upstream (directly after grabbing project lock)
 	CheckForUpstreamChanges bool
+	// GitCacheManager handles local mirror clones for faster workspace cloning.
+	// If nil, git caching is disabled.
+	GitCacheManager *GitCacheManager
 }
 
 func (w *FileWorkspace) CheckoutMergeEnabled() bool {
@@ -684,20 +687,41 @@ func (w *FileWorkspace) forceClone(logger logging.SimpleLogging, c wrappedGitCon
 		return w.cloneNonPRRef(logger, c, headCloneURL)
 	}
 
+	// Resolve mirror path for --reference-if-able (empty string if caching is disabled)
+	mirrorPath := ""
+	if w.GitCacheManager != nil {
+		mirrorPath = w.GitCacheManager.EnsureMirror(logger, baseCloneURL, c.pr.BaseRepo.FullName)
+	}
+
 	// if branch strategy, use depth=1
 	if !w.CheckoutMerge {
-		return w.wrappedGit(logger, c, "clone", "--depth=1", "--branch", c.pr.HeadBranch, "--single-branch", headCloneURL, c.dir)
+		args := []string{"clone"}
+		if mirrorPath != "" {
+			args = append(args, "--reference-if-able", mirrorPath)
+		}
+		args = append(args, "--depth=1", "--branch", c.pr.HeadBranch, "--single-branch", headCloneURL, c.dir)
+		return w.wrappedGit(logger, c, args...)
 	}
 
 	// if merge strategy...
 
 	// if no checkout depth, omit depth arg
 	if w.CheckoutDepth == 0 {
-		if err := w.wrappedGit(logger, c, "clone", "--branch", c.pr.BaseBranch, "--single-branch", baseCloneURL, c.dir); err != nil {
+		args := []string{"clone"}
+		if mirrorPath != "" {
+			args = append(args, "--reference-if-able", mirrorPath)
+		}
+		args = append(args, "--branch", c.pr.BaseBranch, "--single-branch", baseCloneURL, c.dir)
+		if err := w.wrappedGit(logger, c, args...); err != nil {
 			return err
 		}
 	} else {
-		if err := w.wrappedGit(logger, c, "clone", "--depth", fmt.Sprint(w.CheckoutDepth), "--branch", c.pr.BaseBranch, "--single-branch", baseCloneURL, c.dir); err != nil {
+		args := []string{"clone"}
+		if mirrorPath != "" {
+			args = append(args, "--reference-if-able", mirrorPath)
+		}
+		args = append(args, "--depth", fmt.Sprint(w.CheckoutDepth), "--branch", c.pr.BaseBranch, "--single-branch", baseCloneURL, c.dir)
+		if err := w.wrappedGit(logger, c, args...); err != nil {
 			return err
 		}
 	}
