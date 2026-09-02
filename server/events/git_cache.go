@@ -46,6 +46,9 @@ type GitCacheManager struct {
 
 // Start begins the background refresh loop. It blocks until ctx is cancelled.
 func (g *GitCacheManager) Start(ctx context.Context) {
+	if g.Interval <= 0 {
+		g.Interval = 60 * time.Second
+	}
 	g.Logger.Info("git cache manager started, cache dir: %s, refresh interval: %s", g.CacheDir, g.Interval)
 	g.safeRefreshAll()
 
